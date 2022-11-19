@@ -2,12 +2,11 @@ import React from 'react'
 import { useSelector } from 'react-redux';
 import { Container, Row, Col } from 'reactstrap'
 import { useState } from 'react';
-import { useEffect } from 'react';
 
 function Main() {
 
     const weatherCities = useSelector((state) => state.weatherList.mainArr);
-    const weatherCitiesFilter = weatherCities
+
 
 
     const [weathers, setWeathers] = useState(null)
@@ -26,7 +25,15 @@ function Main() {
 
         fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${currentCity.latitude}&lon=${currentCity.longitude}0&appid=${process.env.REACT_APP_API_KEY}&exclude=minutely,hourly&units=metric`)
             .then(response => response.json())
-            .then(data => setWeathers(data))
+            .then(data => {
+                const arr = data.daily;
+                arr.pop()
+                arr.forEach(item => {
+                    const date = new Date(item.dt * 1000);
+                    item.dayName = date.toLocaleDateString("tr-TR", { weekday: "long" })
+                });
+                setWeathers(arr);
+            })
             .catch(err => console.log("error"))
 
 
@@ -34,22 +41,6 @@ function Main() {
 
 
 
-    useEffect(() => {
-
-
-
-        if (weathers) {
-
-            const dateVarMon = weathers.daily[0].dt
-            const dateMon = new Date(dateVarMon * 1000)
-
-
-            console.log(weathers.daily)
-        }
-
-
-
-    }, [weathers])
 
 
 
@@ -72,8 +63,8 @@ function Main() {
                 <Row>
 
                     <Col xs="2" className='my-3'>
-                        <select className="form-select" aria-label="Default select example" value={weatherCitiesFilter.name} onChange={(e) => handleChange(e.target.value)}>
-                            <option selected>Şehir seçiniz</option>
+                        <select className="form-select" aria-label="Default select example" defaultValue="DEFAULT" onChange={(e) => handleChange(e.target.value)}>
+                            <option value="DEFAULT" >Şehir seçiniz</option>
 
 
 
@@ -95,145 +86,24 @@ function Main() {
 
 
                     {
-                        weathers ?
+                        weathers && weathers.map((item, i) => (
 
-                            <Col className='mt-5'>
-                                <div className="card text-center" style={{ width: "10rem" }}>
+                            <Col key={i} className='mt-5'>
+                                <div className={`card text-center  ${i === 0 && "border-dark"}`} style={{ width: "10rem", }}  >
 
 
-                                    <h4 className="card-text mt-2">{dateMon}</h4>
-                                    <img className="card-img-top rounded mx-auto d-block" src={`http://openweathermap.org/img/wn/${weathers.daily[0].weather[0].icon}@2x.png`} alt="weather" style={{ width: "5rem" }} />
+                                    <h4 className="card-text mt-2">{item.dayName}</h4>
+                                    <img className="card-img-top rounded mx-auto d-block" src={`http://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`} alt="weather" style={{ width: "5rem" }} />
                                     <div className="card-body">
-                                        <p className="card-text">{weathers.daily[0].temp.max} / {weathers.daily[0].temp.min}</p>
+                                        <p className="card-text">{item.temp.max} / {item.temp.min}</p>
                                     </div>
                                 </div>
                             </Col>
 
-                            :
-
-                            null
+                        ))
                     }
 
-                    {
-                        weathers ?
 
-                            <Col className='mt-5'>
-                                <div className="card text-center" style={{ width: "10rem" }}>
-
-
-                                    <h4 className="card-text mt-2">Salı</h4>
-                                    <img className="card-img-top rounded mx-auto d-block" src={`http://openweathermap.org/img/wn/${weathers.daily[1].weather[0].icon}@2x.png`} alt="weather" style={{ width: "5rem" }} />
-                                    <div className="card-body">
-                                        <p className="card-text">{weathers.daily[1].temp.max} / {weathers.daily[1].temp.min}</p>
-                                    </div>
-                                </div>
-                            </Col>
-
-                            :
-
-                            null
-                    }
-
-                    {
-                        weathers ?
-
-                            <Col className='mt-5'>
-                                <div className="card text-center" style={{ width: "10rem" }}>
-
-
-                                    <h4 className="card-text mt-2">Çarşamba</h4>
-                                    <img className="card-img-top rounded mx-auto d-block" src={`http://openweathermap.org/img/wn/${weathers.daily[2].weather[0].icon}@2x.png`} alt="weather" style={{ width: "5rem" }} />
-                                    <div className="card-body">
-                                        <p className="card-text">{weathers.daily[2].temp.max} / {weathers.daily[2].temp.min}</p>
-                                    </div>
-                                </div>
-                            </Col>
-
-                            :
-
-                            null
-                    }
-
-                    {
-                        weathers ?
-
-                            <Col className='mt-5'>
-                                <div className="card text-center" style={{ width: "10rem" }}>
-
-
-                                    <h4 className="card-text mt-2">Perşembe</h4>
-                                    <img className="card-img-top rounded mx-auto d-block" src={`http://openweathermap.org/img/wn/${weathers.daily[3].weather[0].icon}@2x.png`} alt="weather" style={{ width: "5rem" }} />
-                                    <div className="card-body">
-                                        <p className="card-text">{weathers.daily[3].temp.max} / {weathers.daily[3].temp.min}</p>
-                                    </div>
-                                </div>
-                            </Col>
-
-                            :
-
-                            null
-                    }
-
-                    {
-                        weathers ?
-
-                            <Col className='mt-5'>
-                                <div className="card text-center" style={{ width: "10rem" }}>
-
-
-                                    <h4 className="card-text mt-2">Cuma</h4>
-                                    <img className="card-img-top rounded mx-auto d-block" src={`http://openweathermap.org/img/wn/${weathers.daily[4].weather[0].icon}@2x.png`} alt="weather" style={{ width: "5rem" }} />
-                                    <div className="card-body">
-                                        <p className="card-text">{weathers.daily[4].temp.max} / {weathers.daily[4].temp.min}</p>
-                                    </div>
-                                </div>
-                            </Col>
-
-                            :
-
-                            null
-                    }
-
-                    {
-                        weathers ?
-
-                            <Col className='mt-5'>
-                                <div className="card text-center" style={{ width: "10rem" }}>
-
-
-                                    <h4 className="card-text mt-2">Cumartesi</h4>
-                                    <img className="card-img-top rounded mx-auto d-block" src={`http://openweathermap.org/img/wn/${weathers.daily[5].weather[0].icon}@2x.png`} alt="weather" style={{ width: "5rem" }} />
-                                    <div className="card-body">
-                                        <p className="card-text">{weathers.daily[5].temp.max} / {weathers.daily[5].temp.min}</p>
-                                    </div>
-                                </div>
-                            </Col>
-
-                            :
-
-                            null
-                    }
-
-                    {
-                        weathers ?
-
-                            <Col className='mt-5'>
-                                <div className="card text-center" style={{ width: "10rem" }}>
-
-
-                                    <h4 className="card-text mt-2">Pazar</h4>
-                                    <img className="card-img-top rounded mx-auto d-block" src={`http://openweathermap.org/img/wn/${weathers.daily[6].weather[0].icon}@2x.png`} alt="weather" style={{ width: "5rem" }} />
-                                    <div className="card-body">
-                                        <p className="card-text">{weathers.daily[6].temp.max} / {weathers.daily[6].temp.min}</p>
-
-                                    </div>
-                                </div>
-                            </Col>
-
-                            :
-
-                            null
-                    }
 
 
 
